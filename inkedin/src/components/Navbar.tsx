@@ -1,10 +1,28 @@
+import { useNavigate } from "react-router-dom";
+
 export default function Navbar() {
+  const navigate = useNavigate();
+
   return (
     <nav className="navbar">
-      <h1 className="logo">InkedIn</h1>
+      <h1 className="logo" onClick={() => navigate("/")}>
+        InkedIn
+      </h1>
+
       <div>
-        <button className="btn">Login</button>
-        <button className="btn primary">Cadastrar</button>
+        <button
+          className="btn"
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </button>
+
+        <button
+          className="btn primary"
+          onClick={() => navigate("/cadastro")}
+        >
+          Cadastrar
+        </button>
       </div>
     </nav>
   );
