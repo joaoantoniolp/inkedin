@@ -24,7 +24,12 @@ export default function Cadastro() {
     const dados = await resposta.json();
 
     if (dados.sucesso) {
+
       alert("Usuário cadastrado com sucesso!");
+
+      setNome("");
+      setEmail("");
+      setSenha("");
     }
   }
 
