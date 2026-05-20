@@ -10,16 +10,16 @@ app.use(express.json());
 const db = new sqlite3.Database("./backend/database.db");
 
 db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS usuarios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
+db.run(`
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
       nome TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
       senha TEXT NOT NULL,
       tipo TEXT NOT NULL CHECK(tipo IN ('cliente', 'tatuador')),
       criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+)
+`);
 
   db.run(`
     CREATE TABLE IF NOT EXISTS perfis_tatuadores (
@@ -37,7 +37,7 @@ db.serialize(() => {
 });
 
 app.get("/", (req, res) => {
-  res.send("API funcionando");
+    res.send("API funcionando");
 });
 
 app.post("/cadastro", (req, res) => {
@@ -55,26 +55,52 @@ app.post("/cadastro", (req, res) => {
     });
   }
 
-  db.run(
+    db.run(
     "INSERT INTO usuarios(nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
     [nome, email, senha, tipo],
     function (err) {
-      if (err) {
+            if (err) {
         return res.status(500).json({
           erro: "Erro ao cadastrar usuário.",
           detalhes: err.message
         });
-      }
+            }
 
-      res.json({
-        sucesso: true,
-        id: this.lastID
-      });
-    }
-  );
+            res.json({
+                sucesso: true,
+                id: this.lastID
+            });
+        }
+    );
 });
 
+app.post("/login", (req, res) => {
+    const { email, senha } = req.body;
+
+    db.get(
+        "SELECT * FROM usuarios WHERE email = ? AND senha = ?",
+        [email, senha],
+        (err, row) => {
+
+            if (err) {
+                return res.status(500).json(err);
+            }
+
+            if (row) {
+                res.json({
+                    sucesso: true,
+                    usuario: row
+                });
+            } else {
+                res.json({
+                    sucesso: false,
+                    mensagem: "Usuário não encontrado"
+                });
+            }
+        }
+    );
+});
 
 app.listen(3000, () => {
-  console.log("Servidor rodando na porta 3000");
+    console.log("Servidor rodando na porta 3000");
 });
