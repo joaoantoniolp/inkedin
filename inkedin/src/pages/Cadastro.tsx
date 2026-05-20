@@ -4,6 +4,7 @@ export default function Cadastro() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [tipo, setTipo] = useState("");
 
   async function cadastrar() {
 
@@ -18,6 +19,7 @@ export default function Cadastro() {
         nome,
         email,
         senha,
+        tipo,
       }),
     });
 
@@ -30,6 +32,7 @@ export default function Cadastro() {
       setNome("");
       setEmail("");
       setSenha("");
+      setTipo("");
     }
   }
 
@@ -61,6 +64,17 @@ export default function Cadastro() {
         value={senha}
         onChange={(e) => setSenha(e.target.value)}
       />
+
+      <br />
+      <br />
+
+      <select
+        value={tipo}
+        onChange={(e) => setTipo(e.target.value)}
+      >
+        <option value="cliente">Cliente</option>
+        <option value="tatuador">Tatuador</option>
+      </select>
 
       <br />
       <br />
