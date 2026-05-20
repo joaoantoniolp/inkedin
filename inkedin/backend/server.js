@@ -41,32 +41,6 @@ app.post("/cadastro", (req, res) => {
     );
 });
 
-app.post("/login", (req, res) => {
-    const { email, senha } = req.body;
-
-    db.get(
-        "SELECT * FROM usuarios WHERE email = ? AND senha = ?",
-        [email, senha],
-        (err, row) => {
-
-            if (err) {
-                return res.status(500).json(err);
-            }
-
-            if (row) {
-                res.json({
-                    sucesso: true,
-                    usuario: row
-                });
-            } else {
-                res.json({
-                    sucesso: false,
-                    mensagem: "Usuário não encontrado"
-                });
-            }
-        }
-    );
-});
 
 app.listen(3000, () => {
     console.log("Servidor rodando na porta 3000");
