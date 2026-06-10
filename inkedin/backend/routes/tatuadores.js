@@ -67,7 +67,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ success: false, message: "Erro ao buscar tatuadores." });
   }
 });
-
+ 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
  
@@ -121,3 +121,101 @@ router.get("/:id", async (req, res) => {
 });
  
 export default router;
+ 
+// Busca perfil do tatuador pelo ID do usuário logado (para o dashboard)
+router.get('/usuario/:usuario_id', async (req, res) => {
+  const { usuario_id } = req.params;
+ 
+  try {
+    const tatuador = await queryOne(`
+      SELECT pt.id, u.id AS usuario_id, u.nome, u.email,
+             pt.bio, pt.estudio, pt.cidade, pt.estado,
+             pt.valor_minimo, pt.valor_maximo, pt.avaliacao_media,
+             pt.instagram, pt.foto_perfil,
+             GROUP_CONCAT(e.nome, ', ') AS estilos
+      FROM perfis_tatuadores pt
+      INNER JOIN usuarios u          ON u.id  = pt.usuario_id
+      LEFT  JOIN tatuador_estilos te ON te.tatuador_id = pt.id
+      LEFT  JOIN estilos e           ON e.id  = te.estilo_id
+      WHERE pt.usuario_id = ?
+      GROUP BY pt.id
+    `, [usuario_id]);
+ 
+    if (!tatuador) {
+      // Ainda não tem perfil — retorna sucesso com data null
+      return res.json({ success: true, data: null });
+    }
+ 
+    const portfolio = await query(`
+      SELECT p.id, p.titulo, p.descricao, p.imagem_url, p.criado_em, e.nome AS estilo
+      FROM portfolio p
+      LEFT JOIN estilos e ON e.id = p.estilo_id
+      WHERE p.tatuador_id = ?
+      ORDER BY p.criado_em DESC
+    `, [tatuador.id]);
+ 
+    res.json({
+      success: true,
+      data: {
+        ...tatuador,
+        estilos:   tatuador.estilos ? tatuador.estilos.split(', ') : [],
+        portfolio,
+      },
+    });
+  } catch (err) {
+    console.error('Erro ao buscar perfil do dashboard:', err);
+    res.status(500).json({ success: false, message: 'Erro interno.' });
+  }
+});
+ 
+// Atualiza (ou cria) o perfil do tatuador
+router.put('/usuario/:usuario_id', async (req, res) => {
+  const { usuario_id } = req.params;
+  const { bio, estudio, cidade, estado, valor_minimo, valor_maximo, instagram, estilos } = req.body;
+ 
+  try {
+    // Verifica se já tem perfil
+    const existente = await queryOne(
+      'SELECT id FROM perfis_tatuadores WHERE usuario_id = ?', [usuario_id]
+    );
+ 
+    let tatuadorId;
+ 
+    if (existente) {
+      // Atualiza
+      await run(`
+        UPDATE perfis_tatuadores
+        SET bio=?, estudio=?, cidade=?, estado=?, valor_minimo=?, valor_maximo=?, instagram=?
+        WHERE usuario_id=?
+      `, [bio, estudio, cidade, estado, valor_minimo, valor_maximo, instagram, usuario_id]);
+      tatuadorId = existente.id;
+    } else {
+      // Cria novo perfil
+      const result = await run(`
+        INSERT INTO perfis_tatuadores (usuario_id, bio, estudio, cidade, estado, valor_minimo, valor_maximo, instagram)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `, [usuario_id, bio, estudio, cidade, estado, valor_minimo, valor_maximo, instagram]);
+      tatuadorId = result.lastID;
+    }
+ 
+    // Atualiza estilos: deleta os antigos e insere os novos
+    await run('DELETE FROM tatuador_estilos WHERE tatuador_id = ?', [tatuadorId]);
+ 
+    if (estilos && estilos.length > 0) {
+      for (const nomeEstilo of estilos) {
+        const estiloRow = await queryOne('SELECT id FROM estilos WHERE nome = ?', [nomeEstilo]);
+        if (estiloRow) {
+          await run(
+            'INSERT OR IGNORE INTO tatuador_estilos (tatuador_id, estilo_id) VALUES (?, ?)',
+            [tatuadorId, estiloRow.id]
+          );
+        }
+      }
+    }
+ 
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao salvar perfil:', err);
+    res.status(500).json({ success: false, message: 'Erro ao salvar perfil.' });
+  }
+});

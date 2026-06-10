@@ -117,7 +117,7 @@ export default function BuscaTattoo() {
   return (
     <div className="busca-container">
 
-      {/* ── Sidebar de filtros ─────────────────────────────────── */}
+      {/* Sidebar de filtros */}
       <aside className={`busca-sidebar ${painelAberto ? 'aberto' : ''}`}>
         <div className="sidebar-header">
           <h2>Filtros</h2>

@@ -1,11 +1,11 @@
-/* ── Layout geral ─────────────────────────────────────────────────────────── */
+/* Layout geral */
 .busca-container {
   display: flex;
   min-height: calc(100vh - 64px); /* desconta a Navbar */
   background: #0d0d0d;
 }
 
-/* ── Sidebar de filtros ───────────────────────────────────────────────────── */
+/* Sidebar de filtros */
 .busca-sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -32,7 +32,7 @@
   margin: 0;
 }
 
-/* ── Grupos de filtro ─────────────────────────────────────────────────────── */
+/* Grupos de filtro */
 .filtros-form {
   display: flex;
   flex-direction: column;
@@ -172,7 +172,7 @@
 .chip:hover       { border-color: #c9a84c; color: #c9a84c; }
 .chip.chip-ativo  { background: #c9a84c22; border-color: #c9a84c; color: #c9a84c; font-weight: 600; }
 
-/* ── Área principal ───────────────────────────────────────────────────────── */
+/* Área principal */
 .busca-main {
   flex: 1;
   padding: 2rem 2rem;
@@ -281,7 +281,7 @@
 .busca-vazio span { font-size: 2.5rem; }
 .busca-erro { color: #e07070; }
 
-/* ── Responsividade mobile ────────────────────────────────────────────────── */
+/* Responsividade mobile */
 @media (max-width: 768px) {
   .busca-sidebar {
     position: fixed;
