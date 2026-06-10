@@ -1,0 +1,129 @@
+.tattoo-card {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.tattoo-card:hover {
+  transform: translateY(-4px);
+  border-color: #c9a84c55;
+  box-shadow: 0 8px 32px rgba(201, 168, 76, 0.08);
+}
+
+/* Foto de perfil */
+.card-foto {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  background: #1e1e1e;
+  flex-shrink: 0;
+}
+
+.card-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.tattoo-card:hover .card-foto img {
+  transform: scale(1.04);
+}
+
+.card-foto-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #c9a84c;
+  background: #1a1a1a;
+  user-select: none;
+}
+
+/* Corpo do card */
+.card-corpo {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.card-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-nome {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.card-avaliacao {
+  font-size: 0.8rem;
+  color: #c9a84c;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card-avaliacao small {
+  color: #888;
+  font-size: 0.7rem;
+}
+
+.card-localizacao {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+.card-bio {
+  font-size: 0.8rem;
+  color: #999;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Chips de estilo */
+.card-estilos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.estilo-chip {
+  background: #c9a84c18;
+  border: 1px solid #c9a84c44;
+  border-radius: 20px;
+  color: #c9a84c;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.estilo-chip-mais {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #666;
+}
+
+.card-preco {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c9a84c;
+  margin: 4px 0 0;
+}

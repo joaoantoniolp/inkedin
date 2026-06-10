@@ -1,0 +1,123 @@
+import express from "express";
+import db      from "../db.js";
+ 
+const router = express.Router();
+ 
+const query = (sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+ 
+const queryOne = (sql, params = []) =>
+  new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+ 
+router.get("/", async (req, res) => {
+  const { nome, estilo, cidade, estado, preco_max, avaliacao_min } = req.query;
+ 
+  let sql = `
+    SELECT
+      pt.id,
+      u.nome,
+      pt.bio,
+      pt.estudio,
+      pt.cidade,
+      pt.estado,
+      pt.valor_minimo,
+      pt.valor_maximo,
+      pt.avaliacao_media,
+      pt.instagram,
+      pt.foto_perfil,
+      GROUP_CONCAT(e.nome, ', ') AS estilos
+    FROM perfis_tatuadores pt
+    INNER JOIN usuarios u          ON u.id  = pt.usuario_id
+    LEFT  JOIN tatuador_estilos te ON te.tatuador_id = pt.id
+    LEFT  JOIN estilos e           ON e.id  = te.estilo_id
+    WHERE 1=1
+  `;
+ 
+  const params = [];
+ 
+  if (nome)         { sql += ` AND u.nome LIKE ?`;                   params.push(`%${nome}%`); }
+  if (cidade)       { sql += ` AND LOWER(pt.cidade) LIKE LOWER(?)`;  params.push(`%${cidade}%`); }
+  if (estado)       { sql += ` AND LOWER(pt.estado) = LOWER(?)`;     params.push(estado); }
+  if (preco_max)    { sql += ` AND pt.valor_minimo <= ?`;             params.push(Number(preco_max)); }
+  if (avaliacao_min){ sql += ` AND pt.avaliacao_media >= ?`;          params.push(Number(avaliacao_min)); }
+ 
+  sql += ` GROUP BY pt.id`;
+  if (estilo) { sql += ` HAVING estilos LIKE ?`; params.push(`%${estilo}%`); }
+  sql += ` ORDER BY pt.avaliacao_media DESC`;
+ 
+  try {
+    const tatuadores = await query(sql, params);
+    const resultado  = tatuadores.map(t => ({
+      ...t,
+      estilos: t.estilos ? t.estilos.split(", ") : [],
+    }));
+    res.json({ success: true, data: resultado });
+  } catch (err) {
+    console.error("Erro na busca:", err);
+    res.status(500).json({ success: false, message: "Erro ao buscar tatuadores." });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+ 
+  try {
+    const tatuador = await queryOne(`
+      SELECT pt.id, u.nome, u.email, pt.bio, pt.estudio, pt.cidade, pt.estado,
+             pt.valor_minimo, pt.valor_maximo, pt.avaliacao_media, pt.instagram,
+             pt.foto_perfil, GROUP_CONCAT(e.nome, ', ') AS estilos
+      FROM perfis_tatuadores pt
+      INNER JOIN usuarios u          ON u.id  = pt.usuario_id
+      LEFT  JOIN tatuador_estilos te ON te.tatuador_id = pt.id
+      LEFT  JOIN estilos e           ON e.id  = te.estilo_id
+      WHERE pt.id = ?
+      GROUP BY pt.id
+    `, [id]);
+ 
+    if (!tatuador) {
+      return res.status(404).json({ success: false, message: "Tatuador não encontrado." });
+    }
+ 
+    const portfolio  = await query(`
+      SELECT p.id, p.titulo, p.descricao, p.imagem_url, p.criado_em, e.nome AS estilo
+      FROM portfolio p
+      LEFT JOIN estilos e ON e.id = p.estilo_id
+      WHERE p.tatuador_id = ?
+      ORDER BY p.criado_em DESC
+    `, [id]);
+ 
+    const avaliacoes = await query(`
+      SELECT a.nota, a.comentario, a.criado_em, u.nome AS cliente_nome
+      FROM avaliacoes a
+      INNER JOIN usuarios u ON u.id = a.cliente_id
+      WHERE a.tatuador_id = ?
+      ORDER BY a.criado_em DESC
+      LIMIT 10
+    `, [id]);
+ 
+    res.json({
+      success: true,
+      data: {
+        ...tatuador,
+        estilos: tatuador.estilos ? tatuador.estilos.split(", ") : [],
+        portfolio,
+        avaliacoes,
+      },
+    });
+  } catch (err) {
+    console.error("Erro ao buscar perfil:", err);
+    res.status(500).json({ success: false, message: "Erro interno." });
+  }
+});
+ 
+export default router;
