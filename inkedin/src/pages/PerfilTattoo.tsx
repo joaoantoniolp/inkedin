@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/perfil.css';
 
-//Tipo
+// Tipos
 interface PortfolioItem {
   id: number;
   titulo: string;
@@ -37,7 +37,7 @@ interface Tatuador {
   avaliacoes: Avaliacao[];
 }
 
-//Componente de estrelas
+// Componente de estrelas
 function Estrelas({ nota, tamanho = 'md' }: { nota: number; tamanho?: 'sm' | 'md' | 'lg' }) {
   return (
     <span className={`estrelas estrelas-${tamanho}`}>
@@ -48,10 +48,13 @@ function Estrelas({ nota, tamanho = 'md' }: { nota: number; tamanho?: 'sm' | 'md
   );
 }
 
-//Componente principal
+// Componente principal
 export default function PerfilTattoo() {
-  const { id }      = useParams<{ id: string }>();
-  const navigate    = useNavigate();
+  const { id }   = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  // Usuário logado (pode ser null se não logado)
+  const usuario = JSON.parse(localStorage.getItem('usuario') || 'null');
 
   const [tatuador, setTatuador]         = useState<Tatuador | null>(null);
   const [carregando, setCarregando]     = useState(true);
@@ -59,7 +62,11 @@ export default function PerfilTattoo() {
   const [fotoAmpliada, setFotoAmpliada] = useState<PortfolioItem | null>(null);
   const [abaAtiva, setAbaAtiva]         = useState<'portfolio' | 'avaliacoes'>('portfolio');
 
-  //Busca os dados do tatuador
+  // Estado do botão de favoritar
+  const [favoritado, setFavoritado]       = useState(false);
+  const [togglingFav, setTogglingFav]     = useState(false);
+
+  // Carrega perfil
   useEffect(() => {
     const carregarPerfil = async () => {
       try {
@@ -81,7 +88,59 @@ export default function PerfilTattoo() {
     carregarPerfil();
   }, [id]);
 
-  //Estados de UI
+  // Verifica se já é favorito
+  useEffect(() => {
+    if (!usuario || usuario.tipo !== 'cliente' || !id) return;
+
+    const verificarFavorito = async () => {
+      try {
+        const res  = await fetch(`http://localhost:3000/api/favoritos/check/${usuario.id}/${id}`);
+        const json = await res.json();
+        if (json.success) setFavoritado(json.favoritado);
+      } catch {
+        // silencioso — não impede o uso da página
+      }
+    };
+
+    verificarFavorito();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // Toggle favorito
+  const handleFavoritar = async () => {
+    if (!usuario) {
+      navigate('/login');
+      return;
+    }
+
+    setTogglingFav(true);
+
+    try {
+      if (favoritado) {
+        // Remove dos favoritos
+        await fetch('http://localhost:3000/api/favoritos', {
+          method:  'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ cliente_id: usuario.id, tatuador_id: Number(id) }),
+        });
+        setFavoritado(false);
+      } else {
+        // Adiciona aos favoritos
+        await fetch('http://localhost:3000/api/favoritos', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ cliente_id: usuario.id, tatuador_id: Number(id) }),
+        });
+        setFavoritado(true);
+      }
+    } catch {
+      console.error('Erro ao atualizar favorito');
+    } finally {
+      setTogglingFav(false);
+    }
+  };
+
+  // Estados de UI 
   if (carregando) {
     return (
       <div className="perfil-loading">
@@ -107,7 +166,10 @@ export default function PerfilTattoo() {
     ? `A partir de R$ ${tatuador.valor_minimo}`
     : 'Preço a consultar';
 
-  //Render
+  // Só mostra o botão de favoritar para clientes logados
+  const mostrarBotaoFavoritar = usuario && usuario.tipo === 'cliente';
+
+  // Render
   return (
     <div className="perfil-container">
 
@@ -116,7 +178,7 @@ export default function PerfilTattoo() {
         ← Voltar
       </button>
 
-      {/* Hero: foto + info principal */}
+      {/* Hero */}
       <section className="perfil-hero">
         <div className="perfil-foto-wrapper">
           {tatuador.foto_perfil
@@ -132,7 +194,21 @@ export default function PerfilTattoo() {
         </div>
 
         <div className="perfil-info">
-          <h1 className="perfil-nome">{tatuador.nome}</h1>
+          <div className="perfil-nome-linha">
+            <h1 className="perfil-nome">{tatuador.nome}</h1>
+
+            {/* Botão favoritar — só para clientes */}
+            {mostrarBotaoFavoritar && (
+              <button
+                className={`btn-favoritar ${favoritado ? 'favoritado' : ''} ${togglingFav ? 'carregando' : ''}`}
+                onClick={handleFavoritar}
+                disabled={togglingFav}
+                title={favoritado ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+              >
+                {favoritado ? '♥' : '♡'}
+              </button>
+            )}
+          </div>
 
           {tatuador.estudio && (
             <p className="perfil-estudio">🏠 {tatuador.estudio}</p>
@@ -142,7 +218,6 @@ export default function PerfilTattoo() {
             📍 {tatuador.cidade}{tatuador.estado ? `, ${tatuador.estado}` : ''}
           </p>
 
-          {/* Avaliação */}
           <div className="perfil-avaliacao">
             <Estrelas nota={tatuador.avaliacao_media} tamanho="lg" />
             <span className="perfil-avaliacao-num">
@@ -152,10 +227,8 @@ export default function PerfilTattoo() {
             </span>
           </div>
 
-          {/* Preço */}
           <p className="perfil-preco">{precoTexto}</p>
 
-          {/* Estilos */}
           {tatuador.estilos.length > 0 && (
             <div className="perfil-estilos">
               {tatuador.estilos.map(e => (
@@ -164,7 +237,6 @@ export default function PerfilTattoo() {
             </div>
           )}
 
-          {/* Ações */}
           <div className="perfil-acoes">
             {tatuador.instagram && (
               <a
@@ -196,7 +268,7 @@ export default function PerfilTattoo() {
         </section>
       )}
 
-      {/* Abas: Portfólio / Avaliações */}
+      {/* Abas */}
       <div className="perfil-abas">
         <button
           className={`aba-btn ${abaAtiva === 'portfolio' ? 'ativa' : ''}`}
@@ -270,7 +342,7 @@ export default function PerfilTattoo() {
         </section>
       )}
 
-      {/* Lightbox (foto ampliada) */}
+      {/* Lightbox */}
       {fotoAmpliada && (
         <div className="lightbox" onClick={() => setFotoAmpliada(null)}>
           <div className="lightbox-conteudo" onClick={e => e.stopPropagation()}>
@@ -281,15 +353,14 @@ export default function PerfilTattoo() {
             />
             {(fotoAmpliada.titulo || fotoAmpliada.descricao) && (
               <div className="lightbox-info">
-                {fotoAmpliada.titulo && <h3>{fotoAmpliada.titulo}</h3>}
+                {fotoAmpliada.titulo    && <h3>{fotoAmpliada.titulo}</h3>}
                 {fotoAmpliada.descricao && <p>{fotoAmpliada.descricao}</p>}
-                {fotoAmpliada.estilo && <span className="estilo-chip">{fotoAmpliada.estilo}</span>}
+                {fotoAmpliada.estilo    && <span className="estilo-chip">{fotoAmpliada.estilo}</span>}
               </div>
             )}
           </div>
         </div>
       )}
-
     </div>
   );
 }

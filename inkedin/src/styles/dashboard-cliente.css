@@ -1,0 +1,285 @@
+.dashc-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  min-height: calc(100vh - 64px);
+  background: #0d0d0d;
+}
+
+/* Header */
+.dashc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dashc-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.dashc-header p {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+}
+
+.btn-buscar-mais {
+  background: #c9a84c;
+  color: #0d0d0d;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.btn-buscar-mais:hover  { background: #dbbe6a; }
+.btn-buscar-mais:active { transform: scale(0.98); }
+
+/* Contador */
+.dashc-contador {
+  font-size: 0.8rem;
+  color: #555;
+  margin: 0 0 1.25rem;
+}
+
+/* Grid de cards */
+.dashc-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Card de tatuador favorito */
+.dashc-card {
+  display: flex;
+  gap: 1.25rem;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: border-color 0.2s;
+}
+
+.dashc-card:hover { border-color: #c9a84c44; }
+
+/* Foto */
+.dashc-card-foto {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  background: #1e1e1e;
+  border: 2px solid #2a2a2a;
+  transition: border-color 0.2s;
+}
+
+.dashc-card-foto:hover { border-color: #c9a84c; }
+
+.dashc-card-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dashc-foto-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #c9a84c;
+}
+
+/* Info */
+.dashc-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.dashc-card-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dashc-card-nome {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.dashc-card-nome:hover { color: #c9a84c; }
+
+/* Botão desfavoritar */
+.btn-desfavoritar {
+  background: none;
+  border: none;
+  color: #c9a84c;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-desfavoritar:hover   { color: #888; transform: scale(1.15); }
+.btn-desfavoritar.removendo { opacity: 0.4; cursor: not-allowed; }
+
+/* Localização */
+.dashc-localizacao {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Avaliação */
+.dashc-avaliacao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.estrelas { color: #c9a84c; font-size: 0.85rem; letter-spacing: 1px; }
+
+.dashc-avaliacao-num {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Chips de estilo */
+.dashc-estilos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.estilo-chip {
+  background: #c9a84c18;
+  border: 1px solid #c9a84c44;
+  border-radius: 20px;
+  color: #c9a84c;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+}
+
+.estilo-chip-mais {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #666;
+}
+
+/* Rodapé do card */
+.dashc-card-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dashc-preco {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c9a84c;
+}
+
+.btn-ver-perfil {
+  background: none;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #aaa;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-ver-perfil:hover { border-color: #c9a84c; color: #c9a84c; }
+
+/* Estados */
+.dashc-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 5rem 2rem;
+  color: #555;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.dashc-vazio span { font-size: 3rem; }
+
+.dashc-vazio button {
+  background: #c9a84c;
+  color: #0d0d0d;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s;
+}
+
+.dashc-vazio button:hover { background: #dbbe6a; }
+
+.dashc-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 5rem;
+  color: #666;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #2a2a2a;
+  border-top-color: #c9a84c;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsividade */
+@media (max-width: 500px) {
+  .dashc-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .dashc-card-topo   { justify-content: center; }
+  .dashc-estilos     { justify-content: center; }
+  .dashc-card-rodape { justify-content: center; }
+  .dashc-localizacao { text-align: center; }
+}

@@ -1,6 +1,7 @@
 import express  from "express";
 import cors     from "cors";
 import path     from "path";
+import fs       from "fs";
 import { fileURLToPath } from "url";
 import db from "./db.js";
 
@@ -14,18 +15,27 @@ app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-//Rotas
+//Cria pasta uploads se não existir
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+  console.log("📁 Pasta uploads criada.");
+}
+
+//Rotas da API
 import tatuadoresRoutes from "./routes/tatuadores.js";
 import portfolioRoutes  from "./routes/portfolio.js";
+import favoritosRoutes  from "./routes/favoritos.js";
 
 app.use("/api/tatuadores", tatuadoresRoutes);
 app.use("/api/portfolio",  portfolioRoutes);
+app.use("/api/favoritos",  favoritosRoutes);
 
+//Rotas de auth
 app.get("/", (req, res) => {
   res.json({ mensagem: "API InkedIn funcionando ✅" });
 });
 
-//Cadastro
 app.post("/cadastro", (req, res) => {
   const { nome, email, senha, tipo } = req.body;
 
@@ -46,7 +56,6 @@ app.post("/cadastro", (req, res) => {
   );
 });
 
-//Login
 app.post("/login", (req, res) => {
   const { email, senha } = req.body;
 
@@ -64,15 +73,7 @@ app.post("/login", (req, res) => {
   );
 });
 
-//Criar pasta uploads se não existir
-import fs from "fs";
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-  console.log("📁 Pasta uploads criada.");
-}
-
-//Iniciar servidor
+//Start
 app.listen(3000, () => {
   console.log("🚀 Servidor rodando na porta 3000");
 });
