@@ -1,79 +1,57 @@
-import express  from "express";
-import cors     from "cors";
-import path     from "path";
-import fs       from "fs";
-import { fileURLToPath } from "url";
-import db from "./db.js";
+import express  from 'express';
+import cors     from 'cors';
+import path     from 'path';
+import fs       from 'fs';
+import { fileURLToPath } from 'url';
+import db from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const app = express();
 
-//Middlewares
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-//Cria pasta uploads se não existir
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-  console.log("📁 Pasta uploads criada.");
-}
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) { fs.mkdirSync(uploadsDir); console.log('📁 Pasta uploads criada.'); }
 
-//Rotas da API
-import tatuadoresRoutes from "./routes/tatuadores.js";
-import portfolioRoutes  from "./routes/portfolio.js";
-import favoritosRoutes  from "./routes/favoritos.js";
+import tatuadoresRoutes from './routes/tatuadores.js';
+import portfolioRoutes  from './routes/portfolio.js';
+import favoritosRoutes  from './routes/favoritos.js';
+import avaliacoesRoutes from './routes/avaliacoes.js';
 
-app.use("/api/tatuadores", tatuadoresRoutes);
-app.use("/api/portfolio",  portfolioRoutes);
-app.use("/api/favoritos",  favoritosRoutes);
+app.use('/api/tatuadores', tatuadoresRoutes);
+app.use('/api/portfolio',  portfolioRoutes);
+app.use('/api/favoritos',  favoritosRoutes);
+app.use('/api/avaliacoes', avaliacoesRoutes);
 
-//Rotas de auth
-app.get("/", (req, res) => {
-  res.json({ mensagem: "API InkedIn funcionando ✅" });
-});
+app.get('/', (req, res) => res.json({ mensagem: 'API InkedIn funcionando ✅' }));
 
-app.post("/cadastro", (req, res) => {
+app.post('/cadastro', (req, res) => {
   const { nome, email, senha, tipo } = req.body;
-
-  if (!nome || !email || !senha || !tipo) {
-    return res.status(400).json({ erro: "Nome, email, senha e tipo são obrigatórios." });
-  }
-  if (tipo !== "cliente" && tipo !== "tatuador") {
+  if (!nome || !email || !senha || !tipo)
+    return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
+  if (tipo !== 'cliente' && tipo !== 'tatuador')
     return res.status(400).json({ erro: "Tipo deve ser 'cliente' ou 'tatuador'." });
-  }
 
-  db.run(
-    "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
+  db.run('INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)',
     [nome, email, senha, tipo],
-    function (err) {
-      if (err) return res.status(500).json({ erro: "Erro ao cadastrar.", detalhes: err.message });
+    function(err) {
+      if (err) return res.status(500).json({ erro: 'Erro ao cadastrar.', detalhes: err.message });
       res.json({ sucesso: true, id: this.lastID });
     }
   );
 });
 
-app.post("/login", (req, res) => {
+app.post('/login', (req, res) => {
   const { email, senha } = req.body;
-
-  db.get(
-    "SELECT * FROM usuarios WHERE email = ? AND senha = ?",
-    [email, senha],
-    (err, row) => {
-      if (err) return res.status(500).json({ erro: err.message });
-      if (row) {
-        res.json({ sucesso: true, usuario: row });
-      } else {
-        res.json({ sucesso: false, mensagem: "Email ou senha incorretos." });
-      }
-    }
-  );
+  db.get('SELECT * FROM usuarios WHERE email = ? AND senha = ?', [email, senha], (err, row) => {
+    if (err) return res.status(500).json({ erro: err.message });
+    if (row) res.json({ sucesso: true, usuario: row });
+    else res.json({ sucesso: false, mensagem: 'Email ou senha incorretos.' });
+  });
 });
 
-//Start
-app.listen(3000, () => {
-  console.log("🚀 Servidor rodando na porta 3000");
-});
+app.listen(3000, () => console.log('🚀 Servidor rodando na porta 3000'));
